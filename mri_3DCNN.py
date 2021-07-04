@@ -9,38 +9,29 @@ from torchsummary import summary
 import os
 from sklearn.model_selection import train_test_split, StratifiedKFold
 import nilearn
-
 from nilearn import plotting
+from tqdm import tqdm
 
 data_dir = '/content/drive/My Drive/Skoltech Neuroimaging/NeuroML2020/data/seminars/anat/'
 
 
-# Let's watch the data. We will use `nilearn` package for the visualisation:
-# https://nilearn.github.io/modules/generated/nilearn.plotting.plot_anat.html#nilearn.plotting.plot_anat
+def visualize_data(data_dir):
+    # Not completed
+    #TODO: make it universal and pythonic
+    img = nilearn.image.load_img(data_dir +'100408.nii')
+    plotting.plot_anat(img)
+    img_array = nilearn.image.get_data(img)
+    print(img_array.shape)
 
-img = nilearn.image.load_img(data_dir +'100408.nii')
-plotting.plot_anat(img)
+    X, y = np.load(data_dir + 'tensors.npy'), np.load(data_dir + 'labels.npy')
+    X = X[:, np.newaxis, :, :, :]
+    print(X.shape, y.shape)
 
-# Questions:
-# 1. What is the size of image (file)?
-# 2. That is the intensity distribution of voxels?
+    sample_data = X[1,0,:,:,:]
+    X[1,0,:,:,:].shape
 
-img_array = nilearn.image.get_data(img)
-img_array.shape
-
-
-# #### 2. Defining training and target samples
-
-X, y = np.load(data_dir + 'tensors.npy'), np.load(data_dir + 'labels.npy')
-X = X[:, np.newaxis, :, :, :]
-print(X.shape, y.shape)
-
-sample_data = X[1,0,:,:,:]
-X[1,0,:,:,:].shape
-
-
-sample_img = nilearn.image.new_img_like(img, sample_data)
-plotting.plot_anat(sample_img)
+    sample_img = nilearn.image.new_img_like(img, sample_data)
+    plotting.plot_anat(sample_img)
 
 class MriData(torch.utils.data.Dataset):
     def __init__(self, X, y):
@@ -53,14 +44,6 @@ class MriData(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
-
-
-torch.cuda.is_available()
-
-if torch.cuda.is_available():
-  device = torch.device("cuda")
-else:
-  device = torch.device("cpu")
 
 ## Hidden layers 1, 2 and 3
 hidden = lambda c_in, c_out: nn.Sequential(
@@ -87,38 +70,6 @@ class MriNet(nn.Module):
         x = self.linear(x)
         x = F.log_softmax(x, dim=1)
         return x
-
-torch.manual_seed(1)
-np.random.seed(1)
-
-c = 32
-model = MriNet(c).to(device)
-summary(model, (1, 58, 70, 58))
-
-
-# #### 5. Training the model
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
-#del X, y #deleting for freeing space on disc
-
-train_dataset = MriData(X_train, y_train)
-test_dataset = MriData(X_test, y_test)
-#del X_train, X_test, y_train, y_test #deleting for freeing space on disc
-
-train_dataset = MriData(X_train, y_train)
-test_dataset = MriData(X_test, y_test)
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
-val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=28, shuffle=False)
-
-
-CHECKPOINTS_DIR =  data_dir +'/checkpoints'
-
-criterion = nn.NLLLoss().to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
-scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
-
-
-from tqdm import tqdm
 
 def get_accuracy(net, data_loader):
     net.eval()
@@ -206,80 +157,109 @@ def train(epochs, net, criterion, optimizer, train_loader, val_loader, scheduler
 
 # ##### Training first **20 epochs**:
 #
-torch.manual_seed(1)
-np.random.seed(1)
-EPOCHS = 20
+def test():
+    torch.manual_seed(1)
+    np.random.seed(1)
+    EPOCHS = 20
 
-train_loss_list, val_loss_list, train_acc_list, val_acc_list = train(EPOCHS, model, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, save=False)
+    train_loss_list, val_loss_list, train_acc_list, val_acc_list = train(EPOCHS, model, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, save=False)
 
-plt.figure(figsize=(20,8))
+    plt.figure(figsize=(20,8))
 
-plt.subplot(1, 2, 1)
-plt.title('Loss history', fontsize=18)
-plt.plot(train_loss_list[1:], label='Train')
-plt.plot(val_loss_list[1:], label='Validation')
-plt.xlabel('# of epoch', fontsize=16)
-plt.ylabel('Loss', fontsize=16)
-plt.legend(fontsize=16)
-plt.grid()
+    '''
+    plt.subplot(1, 2, 1)
+    plt.title('Loss history', fontsize=18)
+    plt.plot(train_loss_list[1:], label='Train')
+    plt.plot(val_loss_list[1:], label='Validation')
+    plt.xlabel('# of epoch', fontsize=16)
+    plt.ylabel('Loss', fontsize=16)
+    plt.legend(fontsize=16)
+    plt.grid()
 
-plt.subplot(1, 2, 2)
-plt.title('Accuracy history', fontsize=18)
-plt.plot(train_acc_list, label='Train')
-plt.plot(val_acc_list, label='Validation')
-plt.xlabel('# of epoch', fontsize=16)
-plt.ylabel('Accuracy', fontsize=16)
-plt.legend(fontsize=16)
-plt.grid()
-
+    plt.subplot(1, 2, 2)
+    plt.title('Accuracy history', fontsize=18)
+    plt.plot(train_acc_list, label='Train')
+    plt.plot(val_acc_list, label='Validation')
+    plt.xlabel('# of epoch', fontsize=16)
+    plt.ylabel('Accuracy', fontsize=16)
+    plt.legend(fontsize=16)
+    plt.grid()
+    '''
 
 # ##### K-Fold model validation:
+def k_fold_validation():
+    skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+    cross_vall_acc_list = []
+    j = 0
 
-# Questions:
-# 1. What is the purpose of K-Fold in that experiment setting?
-# 2. Can we afford cross-validation in regular DL?
+    for train_index, test_index in skf.split(X, y):
+        print('Doing {} split'.format(j))
+        j += 1
 
-skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
-cross_vall_acc_list = []
-j = 0
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        train_dataset = MriData(X_train, y_train)
+        test_dataset = MriData(X_test, y_test)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
+        val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=28, shuffle=False)
 
-for train_index, test_index in skf.split(X, y):
-    print('Doing {} split'.format(j))
-    j += 1
+        torch.manual_seed(1)
+        np.random.seed(1)
 
-    X_train, X_test = X[train_index], X[test_index]
-    y_train, y_test = y[train_index], y[test_index]
-    train_dataset = MriData(X_train, y_train)
-    test_dataset = MriData(X_test, y_test)
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
-    val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=28, shuffle=False)
+        c = 32
+        model = MriNet(c).to(device)
+        criterion = nn.NLLLoss().to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
+
+        train(EPOCHS, model, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, save=False, verbose=False)
+        cross_vall_acc_list.append(get_accuracy(model, val_loader))
+
+    print('Average cross-validation accuracy (3-folds):', sum(cross_vall_acc_list)/len(cross_vall_acc_list))
+
+
+# #### Model save
+# Training model on whole data and saving it
+def main():
+    # TODO: make it elegant and convenient
+    torch.cuda.is_available()
+
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
 
     torch.manual_seed(1)
     np.random.seed(1)
 
     c = 32
     model = MriNet(c).to(device)
+    summary(model, (1, 58, 70, 58))
+
+
+    # #### 5. Training the model
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+    train_dataset = MriData(X_train, y_train)
+    test_dataset = MriData(X_test, y_test)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
+    val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=28, shuffle=False)
+
+    CHECKPOINTS_DIR =  data_dir +'/checkpoints'
+
+    dataset = MriData(X, y)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
+
+    torch.manual_seed(1)
+    np.random.seed(1)
+
+    model = MriNet(c).to(device)
     criterion = nn.NLLLoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
 
-    train(EPOCHS, model, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, save=False, verbose=False)
-    cross_vall_acc_list.append(get_accuracy(model, val_loader))
+    train(EPOCHS, model, criterion, optimizer, loader, loader, scheduler=scheduler, save=True, verbose=False)
 
-print('Average cross-validation accuracy (3-folds):', sum(cross_vall_acc_list)/len(cross_vall_acc_list))
-
-
-# #### Model save
-# Training model on whole data and saving it
-dataset = MriData(X, y)
-loader = torch.utils.data.DataLoader(dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
-
-torch.manual_seed(1)
-np.random.seed(1)
-
-model = MriNet(c).to(device)
-criterion = nn.NLLLoss().to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
-scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
-
-train(EPOCHS, model, criterion, optimizer, loader, loader, scheduler=scheduler, save=True, verbose=False)
+if __name__ == "__main__":
+    main()
