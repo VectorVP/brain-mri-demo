@@ -1,14 +1,16 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
+import os
 import torch
+import nilearn
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
 import torch.nn as nn
 import torch.utils.data as torch_data
 import torch.nn.functional as F
+
 from torchsummary import summary
-import os
 from sklearn.model_selection import train_test_split, StratifiedKFold
-import nilearn
 from nilearn import plotting
 from tqdm import tqdm
 
