@@ -12,8 +12,6 @@ import nilearn
 from nilearn import plotting
 from tqdm import tqdm
 
-data_dir = '/content/drive/My Drive/Skoltech Neuroimaging/NeuroML2020/data/seminars/anat/'
-
 
 def visualize_data(data_dir):
     # Not completed
@@ -222,8 +220,9 @@ def k_fold_validation():
 # Training model on whole data and saving it
 def main():
     # TODO: make it elegant and convenient
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    data_dir = 'anat/'
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(1)
     np.random.seed(1)
 
@@ -231,6 +230,7 @@ def main():
     model = MriNet(c).to(device)
     summary(model, (1, 58, 70, 58))
 
+    X, y = np.load(data_dir + 'tensors.npy'), np.load(data_dir + 'labels.npy')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
     train_dataset = MriData(X_train, y_train)
     test_dataset = MriData(X_test, y_test)
