@@ -18,8 +18,9 @@ from tqdm import tqdm
 def visualize_data(data_dir, nii_file_path):
     img = nilearn.image.load_img(os.path.join(data_dir, nii_file_path))
     img_array = nilearn.image.get_data(img)
-    plotting.plot_anat(img)
-    print(img_array.shape)
+    file_name = nii_file_path[:-4]
+    plotting.plot_anat(img, output_file=f'{file_name}.png')
+    print(f'Shape of {nii_file_path}: ', img_array.shape)
 
 class MriData(torch.utils.data.Dataset):
     def __init__(self, X, y):
@@ -216,5 +217,4 @@ def main():
     train(EPOCHS, model, criterion, optimizer, loader, loader, scheduler=scheduler, save=True, verbose=False)
 
 if __name__ == "__main__":
-    #main()
-    visualize_data('anat', '100408.nii')
+    main()
