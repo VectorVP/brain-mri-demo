@@ -18,7 +18,7 @@ from tqdm import tqdm
 def visualize_data(data_dir):
     # Not completed
     #TODO: make it universal and pythonic
-    img = nilearn.image.load_img(data_dir +'100408.nii')
+    img = nilearn.image.load_img(os.path.join(data_dir, '100408.nii'))
     plotting.plot_anat(img)
     img_array = nilearn.image.get_data(img)
     print(img_array.shape)
@@ -147,7 +147,7 @@ def train(epochs, net, criterion, optimizer, train_loader, val_loader, scheduler
         val_acc_list.append(get_accuracy(net, val_loader))
 
         if save and val_loss_list[-1] < best_val_loss:
-            torch.save(net.state_dict(), CHECKPOINTS_DIR+'best_model')
+            torch.save(net.state_dict(), os.path.join(CHECKPOINTS_DIR, 'best_model'))
         freq = 1
         if verbose and epoch%freq==0:
             print('Epoch {:02d}/{} || Loss:  Train {:.4f} | Validation {:.4f}'.format(epoch, epochs, train_loss_list[-1], val_loss_list[-1]))
@@ -201,14 +201,14 @@ def main():
     model = MriNet(c).to(device)
     summary(model, (1, 58, 70, 58))
 
-    X, y = np.load(data_dir + 'tensors.npy'), np.load(data_dir + 'labels.npy')
+    X, y = np.load(os.path.join(data_dir, 'tensors.npy')), np.load(os.path.join(data_dir, 'labels.npy'))
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
     train_dataset = MriData(X_train, y_train)
     test_dataset = MriData(X_test, y_test)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
     val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=28, shuffle=False)
 
-    CHECKPOINTS_DIR =  data_dir +'/checkpoints'
+    CHECKPOINTS_DIR =  os.path.join(data_dir, 'checkpoints')
 
     dataset = MriData(X, y)
     loader = torch.utils.data.DataLoader(dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
