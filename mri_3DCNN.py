@@ -15,10 +15,10 @@ from nilearn import plotting
 from tqdm import tqdm
 
 
-def visualize_data(data_dir):
+def visualize_data(data_dir, nii_file_path):
     # Not completed
     #TODO: make it universal and pythonic
-    img = nilearn.image.load_img(os.path.join(data_dir, '100408.nii'))
+    img = nilearn.image.load_img(os.path.join(data_dir, nii_file_path))
     plotting.plot_anat(img)
     img_array = nilearn.image.get_data(img)
     print(img_array.shape)
@@ -202,6 +202,10 @@ def main():
     summary(model, (1, 58, 70, 58))
 
     X, y = np.load(os.path.join(data_dir, 'tensors.npy')), np.load(os.path.join(data_dir, 'labels.npy'))
+    X = X[:, np.newaxis, :, :, :]
+    print(X.shape, y.shape)
+
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
     train_dataset = MriData(X_train, y_train)
     test_dataset = MriData(X_test, y_test)
