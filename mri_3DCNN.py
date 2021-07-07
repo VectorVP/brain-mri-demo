@@ -16,22 +16,10 @@ from tqdm import tqdm
 
 
 def visualize_data(data_dir, nii_file_path):
-    # Not completed
-    #TODO: make it universal and pythonic
     img = nilearn.image.load_img(os.path.join(data_dir, nii_file_path))
-    plotting.plot_anat(img)
     img_array = nilearn.image.get_data(img)
+    plotting.plot_anat(img)
     print(img_array.shape)
-
-    X, y = np.load(data_dir + 'tensors.npy'), np.load(data_dir + 'labels.npy')
-    X = X[:, np.newaxis, :, :, :]
-    print(X.shape, y.shape)
-
-    sample_data = X[1,0,:,:,:]
-    X[1,0,:,:,:].shape
-
-    sample_img = nilearn.image.new_img_like(img, sample_data)
-    plotting.plot_anat(sample_img)
 
 class MriData(torch.utils.data.Dataset):
     def __init__(self, X, y):
@@ -228,4 +216,5 @@ def main():
     train(EPOCHS, model, criterion, optimizer, loader, loader, scheduler=scheduler, save=True, verbose=False)
 
 if __name__ == "__main__":
-    main()
+    #main()
+    visualize_data('anat', '100408.nii')
