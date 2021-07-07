@@ -155,37 +155,6 @@ def train(epochs, net, criterion, optimizer, train_loader, val_loader, scheduler
     return train_loss_list, val_loss_list, train_acc_list, val_acc_list
 
 
-# ##### Training first **20 epochs**:
-#
-def test():
-    torch.manual_seed(1)
-    np.random.seed(1)
-    EPOCHS = 20
-
-    train_loss_list, val_loss_list, train_acc_list, val_acc_list = train(EPOCHS, model, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, save=False)
-
-    plt.figure(figsize=(20,8))
-
-    '''
-    plt.subplot(1, 2, 1)
-    plt.title('Loss history', fontsize=18)
-    plt.plot(train_loss_list[1:], label='Train')
-    plt.plot(val_loss_list[1:], label='Validation')
-    plt.xlabel('# of epoch', fontsize=16)
-    plt.ylabel('Loss', fontsize=16)
-    plt.legend(fontsize=16)
-    plt.grid()
-
-    plt.subplot(1, 2, 2)
-    plt.title('Accuracy history', fontsize=18)
-    plt.plot(train_acc_list, label='Train')
-    plt.plot(val_acc_list, label='Validation')
-    plt.xlabel('# of epoch', fontsize=16)
-    plt.ylabel('Accuracy', fontsize=16)
-    plt.legend(fontsize=16)
-    plt.grid()
-    '''
-
 # ##### K-Fold model validation:
 def k_fold_validation():
     skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
