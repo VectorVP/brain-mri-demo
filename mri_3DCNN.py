@@ -150,6 +150,7 @@ def train(epochs, net, criterion, optimizer, train_loader, val_loader, scheduler
 
 
 def k_fold_validation():
+    EPOCHS = 200
     skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
     cross_vall_acc_list = []
     j = 0
@@ -183,6 +184,7 @@ def k_fold_validation():
 def main():
     # TODO: make it elegant and convenient
     data_dir = 'anat/'
+    EPOCHS = 200
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(1)
