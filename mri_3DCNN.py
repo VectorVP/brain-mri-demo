@@ -93,7 +93,7 @@ def get_loss(net, data_loader):
     return loss / len(data_loader.dataset)
 
 
-def train(epochs, net, criterion, optimizer, train_loader, val_loader, scheduler=None, verbose=True, save=False):
+def train(epochs, net, data_dir, criterion, optimizer, train_loader, val_loader, scheduler=None, verbose=True, save=False):
     CHECKPOINTS_DIR =  os.path.join(data_dir, 'checkpoints')
     best_val_loss = 100_000
     best_model = None
@@ -216,7 +216,7 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
 
-    train(EPOCHS, model, criterion, optimizer, loader, loader, scheduler=scheduler, save=True, verbose=False)
+    train(EPOCHS, model, data_dir, criterion, optimizer, loader, loader, scheduler=scheduler, save=True, verbose=False)
 
 
 if __name__ == "__main__":
