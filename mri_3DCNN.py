@@ -94,6 +94,7 @@ def get_loss(net, data_loader):
 
 
 def train(epochs, net, criterion, optimizer, train_loader, val_loader, scheduler=None, verbose=True, save=False):
+    CHECKPOINTS_DIR =  os.path.join(data_dir, 'checkpoints')
     best_val_loss = 100_000
     best_model = None
     train_loss_list = []
@@ -201,8 +202,6 @@ def main():
     test_dataset = MriData(X_test, y_test)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
     val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=28, shuffle=False)
-
-    CHECKPOINTS_DIR =  os.path.join(data_dir, 'checkpoints')
 
     dataset = MriData(X, y)
     loader = torch.utils.data.DataLoader(dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
