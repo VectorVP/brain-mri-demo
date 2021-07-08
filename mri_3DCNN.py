@@ -22,6 +22,7 @@ def visualize_data(data_dir, nii_file_path):
     plotting.plot_anat(img, output_file=f'{file_name}.png')
     print(f'Shape of {nii_file_path}: ', img_array.shape)
 
+
 class MriData(torch.utils.data.Dataset):
     def __init__(self, X, y):
         super(MriData, self).__init__()
@@ -34,13 +35,14 @@ class MriData(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
 
-## Hidden layers 1, 2 and 3
+
 hidden = lambda c_in, c_out: nn.Sequential(
     nn.Conv3d(c_in, c_out, (3,3,3)), # Convolutional layer
     nn.BatchNorm3d(c_out), # Batch Normalization layer
     nn.ReLU(), # Activational layer
     nn.MaxPool3d(2) # Pooling layer
 )
+
 
 class MriNet(nn.Module):
     def __init__(self, c):
@@ -60,6 +62,7 @@ class MriNet(nn.Module):
         x = F.log_softmax(x, dim=1)
         return x
 
+
 def get_accuracy(net, data_loader):
     net.eval()
     correct = 0
@@ -73,6 +76,7 @@ def get_accuracy(net, data_loader):
         del data, target
     accuracy = 100. * correct / len(data_loader.dataset)
     return accuracy.item()
+
 
 def get_loss(net, data_loader):
     net.eval()
@@ -144,7 +148,6 @@ def train(epochs, net, criterion, optimizer, train_loader, val_loader, scheduler
     return train_loss_list, val_loss_list, train_acc_list, val_acc_list
 
 
-# ##### K-Fold model validation:
 def k_fold_validation():
     skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
     cross_vall_acc_list = []
@@ -176,8 +179,6 @@ def k_fold_validation():
     print('Average cross-validation accuracy (3-folds):', sum(cross_vall_acc_list)/len(cross_vall_acc_list))
 
 
-# #### Model save
-# Training model on whole data and saving it
 def main():
     # TODO: make it elegant and convenient
     data_dir = 'anat/'
@@ -215,6 +216,7 @@ def main():
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
 
     train(EPOCHS, model, criterion, optimizer, loader, loader, scheduler=scheduler, save=True, verbose=False)
+
 
 if __name__ == "__main__":
     main()
