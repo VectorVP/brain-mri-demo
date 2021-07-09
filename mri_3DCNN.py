@@ -11,16 +11,7 @@ import torch.nn.functional as F
 
 from torchsummary import summary
 from sklearn.model_selection import train_test_split, StratifiedKFold
-from nilearn import plotting
 from tqdm import tqdm
-
-
-def visualize_data(data_dir, nii_file_path):
-    img = nilearn.image.load_img(os.path.join(data_dir, nii_file_path))
-    img_array = nilearn.image.get_data(img)
-    file_name = nii_file_path[:-4]
-    plotting.plot_anat(img, output_file=f'{file_name}.png')
-    print(f'Shape of {nii_file_path}: ', img_array.shape)
 
 
 class MriData(torch.utils.data.Dataset):
