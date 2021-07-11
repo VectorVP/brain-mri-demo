@@ -1,11 +1,26 @@
+import torch
 import torch.nn as nn
+
+
+class MriData(torch.utils.data.Dataset):
+    def __init__(self, X, y):
+        super(MriData, self).__init__()
+        self.X = torch.tensor(X, dtype=torch.float32)
+        self.y = torch.tensor(y).long()
+
+    def __len__(self):
+        return self.X.shape[0]
+
+    def __getitem__(self, idx):
+        return self.X[idx], self.y[idx]
+
 
 hidden = lambda c_in, c_out: nn.Sequential(
      nn.Conv3d(c_in, c_out, (3,3,3)), # Convolutional layer
      nn.BatchNorm3d(c_out), # Batch Normalization layer
      nn.ReLU(), # Activational layer
      nn.MaxPool3d(2) # Pooling layer
- )
+)
 
 
 class MriNet(nn.Module):

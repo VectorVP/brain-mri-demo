@@ -13,22 +13,10 @@ from torchsummary import summary
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from tqdm import tqdm
 
-from models.3dcnn import MriNet
-
-class MriData(torch.utils.data.Dataset):
-    def __init__(self, X, y):
-        super(MriData, self).__init__()
-        self.X = torch.tensor(X, dtype=torch.float32)
-        self.y = torch.tensor(y).long()
-
-    def __len__(self):
-        return self.X.shape[0]
-
-    def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
+from models.3dcnn import MriNet, MriData
 
 
-def get_accuracy(net, data_loader):
+def get_accuracy(net, data_loader, device):
     net.eval()
     correct = 0
     for data, target in data_loader:
@@ -43,7 +31,7 @@ def get_accuracy(net, data_loader):
     return accuracy.item()
 
 
-def get_loss(net, data_loader):
+def get_loss(net, data_loader, device):
     net.eval()
     loss = 0
     for data, target in data_loader:
@@ -58,7 +46,7 @@ def get_loss(net, data_loader):
     return loss / len(data_loader.dataset)
 
 
-def train(epochs, net, data_dir, criterion, optimizer, train_loader, val_loader, scheduler=None, verbose=True, save=False):
+def train(epochs, net, device, data_dir, criterion, optimizer, train_loader, val_loader, scheduler=None, verbose=True, save=False):
     CHECKPOINTS_DIR =  os.path.join(data_dir, 'checkpoints')
     best_val_loss = 100000
     best_model = None
