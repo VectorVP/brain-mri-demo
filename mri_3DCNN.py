@@ -113,7 +113,6 @@ def train(epochs, net, data_dir, criterion, optimizer, train_loader, val_loader,
             optimizer.step()
             del X, y, out, loss #freeing gpu space
 
-
         # define NN evaluation, i.e. turn off dropouts, batchnorms, etc.
         net.eval()
         for X, y in val_loader:
@@ -124,7 +123,6 @@ def train(epochs, net, data_dir, criterion, optimizer, train_loader, val_loader,
 
         if scheduler is not None:
             scheduler.step()
-
 
         train_loss_list.append(get_loss(net, train_loader))
         val_loss_list.append(get_loss(net, val_loader))
@@ -166,7 +164,7 @@ def k_fold_validation():
         optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
 
-        train(EPOCHS, model, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, save=False, verbose=False)
+        train(EPOCHS, model, device, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, save=False, verbose=False)
         cross_vall_acc_list.append(get_accuracy(model, val_loader))
 
     print('Average cross-validation accuracy (3-folds):', sum(cross_vall_acc_list)/len(cross_vall_acc_list))
@@ -174,7 +172,7 @@ def k_fold_validation():
 
 def main():
     # TODO: make it elegant and convenient
-    data_dir = 'anat/'
+    data_dir = 'anat'
     EPOCHS = 200
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
