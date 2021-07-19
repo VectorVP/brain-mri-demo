@@ -100,11 +100,8 @@ def train(epochs, net, device, data_dir, criterion, optimizer, train_loader, val
     return train_loss_list, val_loss_list, train_acc_list, val_acc_list
 
 
-def train_full():
+def main():
     # TODO: make it elegant and convenient
-    data_dir = 'anat'
-    EPOCHS = 200
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(1)
     np.random.seed(1)
@@ -115,8 +112,6 @@ def train_full():
 
     X, y = np.load(os.path.join(data_dir, 'tensors.npy')), np.load(os.path.join(data_dir, 'labels.npy'))
     X = X[:, np.newaxis, :, :, :]
-    print(X.shape, y.shape)
-
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
     train_dataset = MriData(X_train, y_train)
@@ -139,4 +134,4 @@ def train_full():
 
 
 if __name__ == "__main__":
-    train_full()
+    main()
