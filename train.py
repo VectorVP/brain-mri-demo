@@ -103,6 +103,7 @@ def train(epochs, net, device, data_dir, criterion, optimizer, train_loader, val
 def main():
     # TODO: make it elegant and convenient
     EPOCHS = 300
+    data_dir = 'anat'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     c = 32
 
@@ -116,13 +117,12 @@ def main():
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
     val_loader = torch.utils.data.DataLoader(test_dataset, batch_size=28, shuffle=False)
 
-    dataset = MriData(X, y)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
     criterion = nn.NLLLoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
 
     train(EPOCHS, model, device, data_dir, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, verbose=False, save=True)
+
 
 if __name__ == "__main__":
     main()
