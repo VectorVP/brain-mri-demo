@@ -47,7 +47,7 @@ def get_loss(net, data_loader, device):
 
 
 def train(epochs, net, device, data_dir, criterion, optimizer, train_loader, val_loader, scheduler=None, verbose=True, save=False):
-    CHECKPOINTS_DIR =  os.path.join(data_dir, 'checkpoints')
+    CHECKPOINTS_DIR =  'checkpoints'
     best_val_loss = 100000
     best_model = None
     train_loss_list = []
