@@ -102,14 +102,11 @@ def train(epochs, net, device, data_dir, criterion, optimizer, train_loader, val
 
 def main():
     # TODO: make it elegant and convenient
+    EPOCHS = 300
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    torch.manual_seed(1)
-    np.random.seed(1)
-
     c = 32
-    model = MriNet(c).to(device)
-    summary(model, (1, 58, 70, 58))
 
+    model = MriNet(c).to(device)
     X, y = np.load(os.path.join(data_dir, 'tensors.npy')), np.load(os.path.join(data_dir, 'labels.npy'))
     X = X[:, np.newaxis, :, :, :]
 
@@ -121,17 +118,11 @@ def main():
 
     dataset = MriData(X, y)
     loader = torch.utils.data.DataLoader(dataset, batch_size=45, shuffle=True)  #45 - recommended value for batchsize
-
-    torch.manual_seed(1)
-    np.random.seed(1)
-
-    model = MriNet(c).to(device)
     criterion = nn.NLLLoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 15], gamma=0.1)
 
-    train(EPOCHS, model, data_dir, criterion, optimizer, loader, loader, scheduler=scheduler, save=True, verbose=False)
-
+    train(EPOCHS, model, device, data_dir, criterion, optimizer, train_loader, val_loader, scheduler=scheduler, verbose=False, save=True)
 
 if __name__ == "__main__":
     main()
